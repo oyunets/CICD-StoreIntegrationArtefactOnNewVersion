@@ -3,7 +3,7 @@ pipeline {
 
 	//Configure the following environment variables before executing the Jenkins Job
 	environment {
-		IntegrationFlowID = "Books Integration Flow"
+		IntegrationFlowID = "Books_Integration_Flow"
 		CPIHost = "${env.CPI_HOST}"
 		CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
 		CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
@@ -54,7 +54,6 @@ pipeline {
 						responseHandle: 'LEAVE_OPEN', 
 						validResponseCodes: '200:299,404',
 						timeout: 30, 
-						//url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + java.net.URLEncoder.encode(env.IntegrationFlowID, "UTF-8") + '\',Version=\'active\')';
 						url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')';
 					if (cpiVersionResponse.status == 404){
 						//Flow not found
