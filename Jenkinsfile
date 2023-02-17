@@ -182,7 +182,7 @@ pipeline {
 
                     //check with cpilint
                     dir('.') {
-                        bat 'cpilint -rules %CPILINT_HOME%/rules/rules.xml -directory ./'
+                        bat '%CPILINT_HOME%/bin/cpilint -rules %CPILINT_HOME%/rules/rules.xml -directory ./'
                     }
 
                     //remove the zip
