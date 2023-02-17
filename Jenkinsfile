@@ -131,6 +131,29 @@ pipeline {
         	}
       	}
       	stage ('chek with CPILint') {
-      	}
+					//download and extract latest integration flow version from Cloud Integration tenant
+					def tempfile=UUID.randomUUID().toString() + ".zip";
+					println("Download artefact");
+					def cpiFlowResponse = httpRequest acceptType: 'APPLICATION_ZIP',
+						customHeaders: [[maskValue: true, name: 'Authorization', value: cpiToken]],
+						ignoreSslErrors: false,
+						responseHandle: 'LEAVE_OPEN',
+						timeout: 30,
+						outputFile: tempfile,
+						url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\''+ env.IntegrationFlowID + '\',Version=\'active\')/$value';
+					def disposition = cpiFlowResponse.headers.toString();
+					def index=disposition.indexOf('filename')+9;
+					def lastindex=disposition.indexOf('.zip', index);
+					def filename=disposition.substring(index + 1, lastindex + 4);
+					def folder=env.GITFolder + '/' + filename.substring(0, filename.indexOf('.zip'));
+					cpiFlowResponse.close();      	}
+
+                    //check with cpilint
+                    dir('.') {
+                        bat 'cpilint -rules %CPILINT_HOME%/rules/rules.xml -directory ./'
+                    }
+
+					//remove the zip
+					fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
    	}
 }
