@@ -131,7 +131,9 @@ pipeline {
         	}
       	}
       	stage ('chek with CPILint') {
-					//download and extract latest integration flow version from Cloud Integration tenant
+      	    steps{
+      	        script {
+				    //download and extract latest integration flow version from Cloud Integration tenant
 					def tempfile=UUID.randomUUID().toString() + ".zip";
 					println("Download artefact");
 					def cpiFlowResponse = httpRequest acceptType: 'APPLICATION_ZIP',
@@ -155,5 +157,8 @@ pipeline {
 
 					//remove the zip
 					fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
+      	        }
+      	    }
+	    }
    	}
 }
