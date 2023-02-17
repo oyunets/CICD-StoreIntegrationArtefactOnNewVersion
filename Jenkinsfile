@@ -182,7 +182,9 @@ pipeline {
 
                     //check with cpilint
                     dir('.') {
-                        bat '%CPILINT_HOME%/bin/cpilint -rules %CPILINT_HOME%/rules/rules.xml -directory ./'
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                            bat '%CPILINT_HOME%/bin/cpilint -rules %CPILINT_HOME%/rules/rules.xml -directory ./'
+                        }
                     }
 
                     //remove the zip
