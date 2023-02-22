@@ -133,7 +133,7 @@ pipeline {
                     checkout([$class                           : 'GitSCM',
                               branches                         : [[name: env.GITBranch]],
                               doGenerateSubmoduleConfigurations: false,
-                              extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'cpilint'],
+                              extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: '.'],
                                                                   [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[$class: 'SparseCheckoutPath', path: 'cpilint']]]],
                               submoduleCfg                     : [],
                               userRemoteConfigs                : [[credentialsId: env.GITCredentials,
