@@ -133,8 +133,8 @@ pipeline {
                     checkout([$class                           : 'GitSCM',
                               branches                         : [[name: env.GITBranch]],
                               doGenerateSubmoduleConfigurations: false,
-                              extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: "."],
-                                                                  [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[$class: 'SparseCheckoutPath', path: env.GITFolder]]]],
+                              extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'cpilint'],
+                                                                  [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[$class: 'SparseCheckoutPath', path: 'cpilint']]]],
                               submoduleCfg                     : [],
                               userRemoteConfigs                : [[credentialsId: env.GITCredentials,
                                                                    url          : 'https://' + env.GITRepositoryURL]]])
@@ -175,7 +175,7 @@ pipeline {
                     }
 
                     //remove the zip
-                    fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
+                    //fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
                 }
             }
         }
