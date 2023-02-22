@@ -170,7 +170,7 @@ pipeline {
                     //check with cpilint
                     dir('.') {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                            sh './cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./'
+                            bat './cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./'
                         }
                     }
 
