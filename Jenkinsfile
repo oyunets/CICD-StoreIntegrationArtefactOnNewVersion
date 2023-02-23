@@ -1,4 +1,4 @@
-def doCPILintStage = false
+def isNewVersion = false
 def iFlowFile
 
 pipeline {
@@ -127,7 +127,7 @@ pipeline {
                     cpiFlowResponse.close()
 
                     //new version exists - check with cpilint
-                    doCPILintStage = true
+                    isNewVersion = true
 
                     //do not remove the zip
                     //fileOperations([fileDeleteOperation(excludes: '', includes: iFlowFile)])
@@ -148,7 +148,7 @@ pipeline {
         stage('Check with CPILint') {
             when {
                 expression {
-                    doCPILintStage
+                    isNewVersion
                 }
             }
             steps {
@@ -177,6 +177,11 @@ pipeline {
         }
 
         stage('Deploy') {
+            when {
+                expression {
+                    isNewVersion
+                }
+            }
             steps {
                 script {
                     //get token
