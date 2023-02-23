@@ -13,7 +13,7 @@ pipeline {
         GITCredentials = "${env.GIT_CRED}"
         GITBranch = "${env.GIT_BRANCH_NAME}"
         GITComment = "Integration Artefacts update from CI/CD pipeline"
-        GITFolder = "IntegrationContent/IntegrationArtefacts"
+        GITFolder = "${env.IntegrationFlowID}/IntegrationContent/IntegrationArtefacts"
     }
     
 //    parameters {
@@ -97,9 +97,6 @@ pipeline {
                         println("Flow does not exist in Git yet")
                     }
 
-                    //zip exists
-                    doCPILintStage = true
-
                     //delete the old flow content from the workspace so that only the latest flow version is stored
                     dir(env.GITFolder + '/' + env.IntegrationFlowID) {
                         deleteDir()
@@ -124,7 +121,10 @@ pipeline {
                     fileOperations([fileUnZipOperation(filePath: tempfile, targetLocation: folder)])
                     cpiFlowResponse.close()
 
-                    //remove the zip
+                    //new version exists - check with cpilint
+                    doCPILintStage = true
+
+                    //do not remove the zip
                     //fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
 
                     //adding the content to the index and uploading it to the repository
