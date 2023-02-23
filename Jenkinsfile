@@ -17,7 +17,7 @@ pipeline {
     }
     
     parameters {
-        booleanParam(name: 'IntegrationFlowID', defaultValue: 'Books_Integration_Flow', description: 'Integration Flow ID')
+        string(name: 'IntegrationFlowID', defaultValue: 'Books_Integration_Flow', description: 'Integration Flow ID')
     }
 
     stages {
