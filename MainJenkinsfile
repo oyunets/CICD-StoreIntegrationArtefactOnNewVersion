@@ -5,7 +5,7 @@ pipeline {
 
     //Configure the following environment variables before executing the Jenkins Job
     environment {
-//        IntegrationFlowID = "Books_Integration_Flow"
+        IntegrationPackageID = "EPAM"
         CPIHost = "${env.CPI_HOST}"
         CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
         CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
@@ -16,9 +16,9 @@ pipeline {
         GITFolder = "IntegrationContent/IntegrationArtefacts"
     }
 
-    parameters {
-        string(name: 'IntegrationPackageID', defaultValue: 'IntegrationPackageID', description: 'Integration Package ID')
-    }
+//    parameters {
+//        string(name: 'IntegrationPackageID', defaultValue: 'IntegrationPackageID', description: 'Integration Package ID')
+//    }
 
     stages {
         stage('Initialization') {
@@ -52,10 +52,12 @@ pipeline {
                             ignoreSslErrors: false,
                             responseHandle: 'LEAVE_OPEN',
                             timeout: 30,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + params.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
+                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + env.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
                     def jsonObj2 = readJSON text: cpiPackageResponse.content
                     jsonObj2.d.results.each { result ->
-                        artifactIds.push(result.Id)
+                        if ('Active' != result.Version) {
+                            artifactIds.push(result.Id)
+                        }
                     }
                     cpiPackageResponse.close()
                 }
@@ -66,7 +68,8 @@ pipeline {
             steps {
                 script {
                     artifactIds.each { id ->
-                        build job: 'Process iFlow', wait: false, parameters: [string(name: 'IntegrationFlowID', value: String.valueOf(id))]
+                        echo 'Start job with IntegrationFlowID = ' + id
+                        build job: 'Process iFlow', wait: false, parameters: [string(name: 'IntegrationFlowID', value: id)]
                     }
                 }
             }
