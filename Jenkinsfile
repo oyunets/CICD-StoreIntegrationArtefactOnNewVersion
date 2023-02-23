@@ -30,6 +30,7 @@ pipeline {
                 }
             }
         }
+
         stage('Store new versions in Git') {
             steps {
                 script {
@@ -165,11 +166,12 @@ pipeline {
                         }
                     }
 
-                    //remove the zip
+                    //remove the cpilint
                     fileOperations([folderDeleteOperation(folderPath: 'cpilint')])
                 }
             }
         }
+
         stage('Cleanup') {
             steps {
                 script {

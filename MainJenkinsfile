@@ -1,0 +1,73 @@
+def doCPILintStage = false
+
+pipeline {
+    agent any
+
+    //Configure the following environment variables before executing the Jenkins Job
+    environment {
+//        IntegrationFlowID = "Books_Integration_Flow"
+        CPIHost = "${env.CPI_HOST}"
+        CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
+        CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
+        GITRepositoryURL = "${env.GIT_REPOSITORY_URL}"
+        GITCredentials = "${env.GIT_CRED}"
+        GITBranch = "${env.GIT_BRANCH_NAME}"
+        GITComment = "Integration Artefacts update from CI/CD pipeline"
+        GITFolder = "IntegrationContent/IntegrationArtefacts"
+    }
+
+    parameters {
+        string(name: 'IntegrationPackageID', defaultValue: 'IntegrationPackageID', description: 'Integration Package ID')
+    }
+
+    stages {
+        stage('Initialization') {
+            steps {
+                script {
+                    //clean up workspace first
+                    echo 'Initialize pipeline'
+                    deleteDir()
+                }
+            }
+        }
+
+        stage('Get List of ') {
+            steps {
+                script {
+                    //get Cloud Integration Oauth token
+                    def cpiTokenResponse = httpRequest acceptType: 'APPLICATION_JSON',
+                            authentication: env.CPIOAuthCredentials,
+                            ignoreSslErrors: false,
+                            responseHandle: 'LEAVE_OPEN',
+                            timeout: 30,
+                            url: 'https://' + env.CPIOAuthHost + '/oauth/token?grant_type=client_credentials'
+                    def jsonObj = readJSON text: cpiTokenResponse.content
+                    def cpiToken = 'bearer' + ' ' + jsonObj.access_token
+                    cpiTokenResponse.close()
+
+                    //download and extract list of integration flowsfrom Cloud Integration tenant
+                    println("Download artefact")
+                    def cpiPackageResponse = httpRequest acceptType: 'APPLICATION_JSON',
+                            customHeaders: [[maskValue: true, name: 'Authorization', value: cpiToken]],
+                            ignoreSslErrors: false,
+                            responseHandle: 'LEAVE_OPEN',
+                            timeout: 30,
+                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + params.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
+                    def jsonObj2 = readJSON text: cpiPackageResponse.content
+                    jsonObj2.d.results.each(result -> print result.id)
+                    cpiPackageResponse.close()
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            steps {
+                script {
+                    //clean up workspace
+                    echo 'Clean pipeline'
+                    deleteDir()
+                }
+            }
+        }
+    }
+}
