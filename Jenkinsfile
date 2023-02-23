@@ -1,3 +1,5 @@
+def doCPILintStage = false
+
 pipeline {
     agent any
 
@@ -87,6 +89,7 @@ pipeline {
                         } else {
                             println("Versions are different")
                         }
+                        doCPILintStage = true
                     } else {
                         println("Flow does not exist in Git yet")
                     }
@@ -132,6 +135,11 @@ pipeline {
         }
 
         stage('Check with CPILint') {
+            when {
+                expression {
+                    doCPILintStage
+                }
+            }
             steps {
                 script {
                     //checkout CPILint and rules
