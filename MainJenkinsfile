@@ -31,7 +31,7 @@ pipeline {
             }
         }
 
-        stage('Get List of ') {
+        stage('Get List of Integration Designtime Artifacts') {
             steps {
                 script {
                     //get Cloud Integration Oauth token
@@ -55,7 +55,7 @@ pipeline {
                             url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + params.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
                     def jsonObj2 = readJSON text: cpiPackageResponse.content
                     jsonObj2.d.results.each { result ->
-                        print result.id
+                        print result
                     }
                     cpiPackageResponse.close()
                 }
