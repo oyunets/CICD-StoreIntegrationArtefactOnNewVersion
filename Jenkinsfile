@@ -1,4 +1,5 @@
 def isNewVersion = false
+def cpiVersion
 def iFlowFile
 
 pipeline {
@@ -75,7 +76,7 @@ pipeline {
                         return
                     }
                     jsonObj = readJSON text: cpiVersionResponse.content
-                    def cpiVersion = jsonObj.d.Version
+                    cpiVersion = jsonObj.d.Version
                     println("Flow version on Cloud Integration tenant: '" + cpiVersion + "'")
                     cpiVersionResponse.close()
 
@@ -142,7 +143,7 @@ pipeline {
                             responseHandle: 'LEAVE_OPEN',
                             timeout: 30,
                             outputFile: iFlowFile,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + params.IntegrationFlowID + '\',Version=\'active\')/$value'
+                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + params.IntegrationFlowID + '\',Version=\'' + cpiVersion + '\')/$value'
                     def disposition = cpiFlowResponse.headers.toString()
                     def index = disposition.indexOf('filename') + 9
                     def lastindex = disposition.indexOf('.zip', index)
@@ -216,61 +217,6 @@ pipeline {
                     def jsonObjToken = readJSON text: getTokenResp.content
                     def token = "Bearer " + jsonObjToken.access_token
 
-                    //check if the flow already exists on the tenant
-                    def checkResp = httpRequest acceptType: 'APPLICATION_JSON',
-                            customHeaders: [
-                                    [maskValue: false, name: 'Authorization', value: token]
-                            ],
-                            httpMode: 'GET',
-                            responseHandle: 'LEAVE_OPEN',
-                            validResponseCodes: '200,201,202,404',
-                            timeout: 30,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')';
-
-                    def filecontent = readFile encoding: 'Base64', file: iFlowFile;
-                    if (checkResp.status == 404) {
-                        //Upload integration flow via POST
-                        println("Flow does not yet exist on configured tenant.");
-                        //prepare upload payload
-                        def postPayload = '{ \"Name\": \"flowName\", \"Id": "flowId\", \"PackageId\": \"packageId\", \"ArtifactContent\":\"flowContent\"}';
-
-                        postPayload = postPayload.replace('flowName', env.IntegrationFlowID);
-                        postPayload = postPayload.replace('flowId', env.IntegrationFlowID);
-                        postPayload = postPayload.replace('packageId', env.IntegrationPackage);
-                        postPayload = postPayload.replace('flowContent', filecontent);
-
-                        //upload
-                        println("Uploading flow.");
-                        def postResp = httpRequest acceptType: 'APPLICATION_JSON',
-                                contentType: 'APPLICATION_JSON',
-                                customHeaders: [
-                                        [maskValue: false, name: 'Authorization', value: token]
-                                ],
-                                httpMode: 'POST',
-                                requestBody: postPayload,
-                                url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts'
-                    } else {
-                        //Overwrite integration flow via PUT
-                        println("Flow already exists on configured tenant. Update will be performed.");
-                        //prepare upload payload
-                        def putPayload = '{ \"Name\": \"flowName\", \"ArtifactContent\": \"iflowContent\"}';
-                        putPayload = putPayload.replace('flowName', env.IntegrationFlowID);
-                        putPayload = putPayload.replace('iflowContent', filecontent);
-
-                        //upload
-                        println("Uploading flow.");
-                        def putResp = httpRequest acceptType: 'APPLICATION_JSON',
-                                contentType: 'APPLICATION_JSON',
-                                customHeaders: [
-                                        [maskValue: false, name: 'Authorization', value: token]
-                                ],
-                                httpMode: 'PUT',
-                                requestBody: putPayload,
-                                url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')';
-                    }
-                    println("Upload successful");
-                    checkResp.close();
-
                     //deploy integration flow
                     println("Deploying integration flow");
                     def deployResp = httpRequest httpMode: 'POST',
@@ -279,7 +225,7 @@ pipeline {
                             ],
                             ignoreSslErrors: true,
                             timeout: 30,
-                            url: 'https://' + env.CPIHost + '/api/v1/DeployIntegrationDesigntimeArtifact?Id=\'' + env.IntegrationFlowID + '\'&Version=\'active\'';
+                            url: 'https://' + env.CPIHost + '/api/v1/DeployIntegrationDesigntimeArtifact?Id=\'' + env.IntegrationFlowID + '\'&Version=\'' + cpiVersion + '\'';
 
                     Integer counter = 0;
                     def deploymentStatus;
