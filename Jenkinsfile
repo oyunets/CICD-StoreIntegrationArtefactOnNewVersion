@@ -5,7 +5,6 @@ pipeline {
 
     //Configure the following environment variables before executing the Jenkins Job
     environment {
-        IntegrationFlowID = "Books_Integration_Flow"
         CPIHost = "${env.CPI_HOST}"
         CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
         CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
@@ -14,6 +13,10 @@ pipeline {
         GITBranch = "${env.GIT_BRANCH_NAME}"
         GITComment = "Integration Artefacts update from CI/CD pipeline"
         GITFolder = "IntegrationContent/IntegrationArtefacts"
+    }
+    
+    parameters {
+        IntegrationFlowID = "Books_Integration_Flow"
     }
 
     stages {
@@ -57,7 +60,7 @@ pipeline {
                             responseHandle: 'LEAVE_OPEN',
                             validResponseCodes: '200:299,404',
                             timeout: 30,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')'
+                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + params.IntegrationFlowID + '\',Version=\'active\')'
                     if (cpiVersionResponse.status == 404) {
                         //Flow not found
                         println("received http 404. Please check the Flow ID you provided in the script. Looks like it does not exist on the tenant.")
@@ -72,8 +75,8 @@ pipeline {
 
                     //get version from source repository
                     def git_version
-                    if (fileExists(env.GITFolder + '/' + env.IntegrationFlowID)) {
-                        dir(env.GITFolder + '/' + env.IntegrationFlowID + "/META-INF") {
+                    if (fileExists(env.GITFolder + '/' + params.IntegrationFlowID)) {
+                        dir(env.GITFolder + '/' + params.IntegrationFlowID + "/META-INF") {
                             def manifestFile = readFile(file: 'MANIFEST.MF')
                             def index = manifestFile.indexOf('Bundle-Version:') + 16
                             def lastindex = manifestFile.indexOf('\n', index)
@@ -97,7 +100,7 @@ pipeline {
                     doCPILintStage = true
 
                     //delete the old flow content from the workspace so that only the latest flow version is stored
-                    dir(env.GITFolder + '/' + env.IntegrationFlowID) {
+                    dir(env.GITFolder + '/' + params.IntegrationFlowID) {
                         deleteDir()
                     }
 
@@ -110,7 +113,7 @@ pipeline {
                             responseHandle: 'LEAVE_OPEN',
                             timeout: 30,
                             outputFile: tempfile,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')/$value'
+                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + params.IntegrationFlowID + '\',Version=\'active\')/$value'
                     def disposition = cpiFlowResponse.headers.toString()
                     def index = disposition.indexOf('filename') + 9
                     def lastindex = disposition.indexOf('.zip', index)
