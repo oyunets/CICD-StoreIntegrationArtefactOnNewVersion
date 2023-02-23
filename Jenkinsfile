@@ -133,8 +133,6 @@ pipeline {
 
         stage('Check with CPILint') {
             steps {
-                //clean up workspace first
-                deleteDir()
                 script {
                     //checkout CPILint and rules
                     checkout([$class                           : 'GitSCM',
@@ -154,7 +152,7 @@ pipeline {
                     }
 
                     //remove the zip
-                    fileOperations([fileDeleteOperation(excludes: '', includes: 'cpilint')])
+                    fileOperations([folderDeleteOperation(folderPath: 'cpilint')])
                 }
             }
         }
