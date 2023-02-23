@@ -5,6 +5,7 @@ pipeline {
 
     //Configure the following environment variables before executing the Jenkins Job
     environment {
+//        IntegrationFlowID = "Books_Integration_Flow"
         CPIHost = "${env.CPI_HOST}"
         CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
         CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
@@ -16,7 +17,7 @@ pipeline {
     }
     
     parameters {
-        IntegrationFlowID = "Books_Integration_Flow"
+        booleanParam(name: 'IntegrationFlowID', defaultValue: 'Books_Integration_Flow', description: 'Integration Flow ID')
     }
 
     stages {
@@ -172,9 +173,9 @@ pipeline {
         stage('Cleanup') {
             steps {
                 script {
-                    //clean up workspace first
+                    //clean up workspace
                     echo 'Clean pipeline'
-//                    deleteDir()
+                    deleteDir()
                 }
             }
         }
