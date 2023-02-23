@@ -35,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Store new versions in Git') {
+        stage('Check for new version') {
             steps {
                 script {
                     //Synchronize repository to workspace
@@ -107,8 +107,34 @@ pipeline {
                         deleteDir()
                     }
 
+                    //new version exists
+                    isNewVersion = true
+                }
+            }
+        }
+
+        stage('Store new versions in Git') {
+            when {
+                expression {
+                    isNewVersion
+                }
+            }
+            steps {
+                script {
+                    //get Cloud Integration Oauth token
+                    def cpiTokenResponse = httpRequest acceptType: 'APPLICATION_JSON',
+                            authentication: env.CPIOAuthCredentials,
+                            ignoreSslErrors: false,
+                            responseHandle: 'LEAVE_OPEN',
+                            timeout: 30,
+                            url: 'https://' + env.CPIOAuthHost + '/oauth/token?grant_type=client_credentials'
+                    def jsonObj = readJSON text: cpiTokenResponse.content
+                    def cpiToken = 'bearer' + ' ' + jsonObj.access_token
+                    cpiTokenResponse.close()
+
                     //download and extract latest integration flow version from Cloud Integration tenant
                     iFlowFile = UUID.randomUUID().toString() + ".zip"
+
                     println("Download artefact")
                     def cpiFlowResponse = httpRequest acceptType: 'APPLICATION_ZIP',
                             customHeaders: [[maskValue: true, name: 'Authorization', value: cpiToken]],
@@ -125,12 +151,6 @@ pipeline {
                     println("Unzip artefact")
                     fileOperations([fileUnZipOperation(filePath: iFlowFile, targetLocation: folder)])
                     cpiFlowResponse.close()
-
-                    //new version exists - check with cpilint
-                    isNewVersion = true
-
-                    //do not remove the zip
-                    //fileOperations([fileDeleteOperation(excludes: '', includes: iFlowFile)])
 
                     //adding the content to the index and uploading it to the repository
                     dir(folder) {
