@@ -163,7 +163,7 @@ pipeline {
                 script {
                     //clean up workspace first
                     echo 'Clean pipeline'
-                    deleteDir()
+//                    deleteDir()
                 }
             }
         }
