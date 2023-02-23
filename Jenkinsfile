@@ -84,15 +84,17 @@ pipeline {
                         if (git_version.trim().equalsIgnoreCase(cpiVersion.trim())) {
                             println("Versions are same, no action required")
                             //EXIT
-//                            currentBuild.result = 'SUCCESS'
-//                            return
+                            currentBuild.result = 'SUCCESS'
+                            return
                         } else {
                             println("Versions are different")
                         }
-                        doCPILintStage = true
                     } else {
                         println("Flow does not exist in Git yet")
                     }
+
+                    //zip exists
+                    doCPILintStage = true
 
                     //delete the old flow content from the workspace so that only the latest flow version is stored
                     dir(env.GITFolder + '/' + env.IntegrationFlowID) {
