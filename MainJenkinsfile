@@ -56,7 +56,7 @@ pipeline {
                     def jsonObj2 = readJSON text: cpiPackageResponse.content
                     jsonObj2.d.results.each { result ->
                         artifactIds.push(result.Id)
-                        echo result
+                        println(result)
                     }
                     cpiPackageResponse.close()
                 }
