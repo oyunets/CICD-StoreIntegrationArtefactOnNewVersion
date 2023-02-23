@@ -131,7 +131,7 @@ pipeline {
             }
         }
 
-        stage('check with CPILint') {
+        stage('Check with CPILint') {
             steps {
                 //clean up workspace first
                 deleteDir()
