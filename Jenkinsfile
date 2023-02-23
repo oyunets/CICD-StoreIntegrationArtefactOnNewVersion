@@ -15,10 +15,17 @@ pipeline {
     }
 
     stages {
-        stage('store new versions in Git') {
+        stage('Initialization') {
             steps {
-                //clean up workspace first
-                deleteDir()
+                script {
+                    //clean up workspace first
+                    echo 'Initialize pipeline'
+                    deleteDir()
+                }
+            }
+        }
+        stage('Store new versions in Git') {
+            steps {
                 script {
                     //Synchronize repository to workspace
                     checkout([$class                           : 'GitSCM',
@@ -109,7 +116,7 @@ pipeline {
                     cpiFlowResponse.close()
 
                     //remove the zip
-                    fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
+                    //fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
 
                     //adding the content to the index and uploading it to the repository
                     dir(folder) {
@@ -129,7 +136,7 @@ pipeline {
                 //clean up workspace first
                 deleteDir()
                 script {
-                    //Synchronize repository to workspace
+                    //checkout CPILint and rules
                     checkout([$class                           : 'GitSCM',
                               branches                         : [[name: env.GITBranch]],
                               doGenerateSubmoduleConfigurations: false,
@@ -139,34 +146,6 @@ pipeline {
                               userRemoteConfigs                : [[credentialsId: env.GITCredentials,
                                                                    url          : 'https://' + env.GITRepositoryURL]]])
 
-                    //get Cloud Integration Oauth token
-                    def cpiTokenResponse = httpRequest acceptType: 'APPLICATION_JSON',
-                            authentication: env.CPIOAuthCredentials,
-                            ignoreSslErrors: false,
-                            responseHandle: 'LEAVE_OPEN',
-                            timeout: 30,
-                            url: 'https://' + env.CPIOAuthHost + '/oauth/token?grant_type=client_credentials'
-                    def jsonObj = readJSON text: cpiTokenResponse.content
-                    def cpiToken = 'bearer' + ' ' + jsonObj.access_token
-                    cpiTokenResponse.close()
-
-                    //download and extract latest integration flow version from Cloud Integration tenant
-                    def tempfile = UUID.randomUUID().toString() + ".zip"
-                    println("Download artefact")
-                    def cpiFlowResponse = httpRequest acceptType: 'APPLICATION_ZIP',
-                            customHeaders: [[maskValue: true, name: 'Authorization', value: cpiToken]],
-                            ignoreSslErrors: false,
-                            responseHandle: 'LEAVE_OPEN',
-                            timeout: 30,
-                            outputFile: tempfile,
-                            url: 'https://' + env.CPIHost + '/api/v1/IntegrationDesigntimeArtifacts(Id=\'' + env.IntegrationFlowID + '\',Version=\'active\')/$value'
-                    def disposition = cpiFlowResponse.headers.toString()
-                    def index = disposition.indexOf('filename') + 9
-                    def lastindex = disposition.indexOf('.zip', index)
-                    def filename = disposition.substring(index + 1, lastindex + 4)
-                    def folder = env.GITFolder + '/' + filename.substring(0, filename.indexOf('.zip'))
-                    cpiFlowResponse.close()
-
                     //check with cpilint
                     dir('.') {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
@@ -175,7 +154,16 @@ pipeline {
                     }
 
                     //remove the zip
-                    //fileOperations([fileDeleteOperation(excludes: '', includes: tempfile)])
+                    fileOperations([fileDeleteOperation(excludes: '', includes: 'cpilint')])
+                }
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                script {
+                    //clean up workspace first
+                    echo 'Clean pipeline'
+                    deleteDir()
                 }
             }
         }
