@@ -55,9 +55,8 @@ pipeline {
                             url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + env.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
                     def jsonObj2 = readJSON text: cpiPackageResponse.content
                     jsonObj2.d.results.each { result ->
-                        if ('Active' != result.Version) {
-                            artifactIds.push(result.Id)
-                        }
+                        artifactIds.push(result.Id)
+                        echo result
                     }
                     cpiPackageResponse.close()
                 }
