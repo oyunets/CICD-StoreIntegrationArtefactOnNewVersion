@@ -233,42 +233,43 @@ pipeline {
                     println("Deployment successful triggered. Checking status.");
                     //performing the loop until we get a final deployment status.
                     while (counter < env.DeploymentCheckRetryCounter.toInteger() & continueLoop == true) {
-                        Thread.sleep(3000);
-                        counter = counter + 1;
-                        def statusResp = httpRequest acceptType: 'APPLICATION_JSON',
-                                customHeaders: [
-                                        [maskValue: false, name: 'Authorization', value: token]
-                                ],
-                                httpMode: 'GET',
-                                responseHandle: 'LEAVE_OPEN',
-                                timeout: 30,
-                                url: 'https://' + env.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + env.IntegrationFlowID + '\')';
-                        def jsonObj = readJSON text: statusResp.content;
-                        deploymentStatus = jsonObj.d.Status;
-
-                        println("Deployment status: " + deploymentStatus);
-                        if (deploymentStatus.equalsIgnoreCase("Error")) {
-                            //get error details
-                            def deploymentErrorResp = httpRequest acceptType: 'APPLICATION_JSON',
+                        timeout(time: 3, unit: 'SECONDS') {
+                            counter = counter + 1;
+                            def statusResp = httpRequest acceptType: 'APPLICATION_JSON',
                                     customHeaders: [
                                             [maskValue: false, name: 'Authorization', value: token]
                                     ],
                                     httpMode: 'GET',
                                     responseHandle: 'LEAVE_OPEN',
                                     timeout: 30,
-                                    url: 'https://' + env.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + env.IntegrationFlowID + '\')' + '/ErrorInformation/$value';
-                            def jsonErrObj = readJSON text: deploymentErrorResp.content
-                            def deployErrorInfo = jsonErrObj.parameter;
-                            println("Error Details: " + deployErrorInfo);
-                            statusResp.close();
-                            deploymentErrorResp.close();
-                            error("Integration flow not deployed successfully. Ending job now.");
-                        } else if (deploymentStatus.equalsIgnoreCase("Started")) {
-                            println("Integration flow deployment was successful")
-                            statusResp.close();
-                            continueLoop = false
-                        } else {
-                            println("The integration flow is not yet started. Will wait 3s and then check again.")
+                                    url: 'https://' + env.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + env.IntegrationFlowID + '\')';
+                            def jsonObj = readJSON text: statusResp.content;
+                            deploymentStatus = jsonObj.d.Status;
+
+                            println("Deployment status: " + deploymentStatus);
+                            if (deploymentStatus.equalsIgnoreCase("Error")) {
+                                //get error details
+                                def deploymentErrorResp = httpRequest acceptType: 'APPLICATION_JSON',
+                                        customHeaders: [
+                                                [maskValue: false, name: 'Authorization', value: token]
+                                        ],
+                                        httpMode: 'GET',
+                                        responseHandle: 'LEAVE_OPEN',
+                                        timeout: 30,
+                                        url: 'https://' + env.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + env.IntegrationFlowID + '\')' + '/ErrorInformation/$value';
+                                def jsonErrObj = readJSON text: deploymentErrorResp.content
+                                def deployErrorInfo = jsonErrObj.parameter;
+                                println("Error Details: " + deployErrorInfo);
+                                statusResp.close();
+                                deploymentErrorResp.close();
+                                error("Integration flow not deployed successfully. Ending job now.");
+                            } else if (deploymentStatus.equalsIgnoreCase("Started")) {
+                                println("Integration flow deployment was successful")
+                                statusResp.close();
+                                continueLoop = false
+                            } else {
+                                println("The integration flow is not yet started. Will wait 3s and then check again.")
+                            }
                         }
                     }
                     if (!deploymentStatus.equalsIgnoreCase("Started")) {
