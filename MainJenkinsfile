@@ -67,19 +67,24 @@ pipeline {
             steps {
                 script {
                     artifactIds.each { id ->
-                        echo 'Start job with IntegrationFlowID = ' + id
-                        build job: 'iFlow', wait: true, parameters: [
-                                string(name: 'IntegrationPackageID', value: IntegrationPackageID),
-                                string(name: 'IntegrationFlowID', value: id),
-                                string(name: 'CPIHost', value: CPIHost),
-                                string(name: 'CPIOAuthHost', value: CPIOAuthHost),
-                                string(name: 'CPIOAuthCredentials', value: CPIOAuthCredentials),
-                                string(name: 'GITRepositoryURL', value: GITRepositoryURL),
-                                string(name: 'GITCredentials', value: GITCredentials),
-                                string(name: 'GITBranch', value: GITBranch),
-                                string(name: 'GITComment', value: GITComment),
-                                string(name: 'GITFolder', value: GITFolder)
-                        ]
+                        try {
+                            echo 'Start job with IntegrationFlowID = ' + id
+                            build job: 'iFlow', wait: true, parameters: [
+                                    string(name: 'IntegrationPackageID', value: IntegrationPackageID),
+                                    string(name: 'IntegrationFlowID', value: id),
+                                    string(name: 'CPIHost', value: CPIHost),
+                                    string(name: 'CPIOAuthHost', value: CPIOAuthHost),
+                                    string(name: 'CPIOAuthCredentials', value: CPIOAuthCredentials),
+                                    string(name: 'GITRepositoryURL', value: GITRepositoryURL),
+                                    string(name: 'GITCredentials', value: GITCredentials),
+                                    string(name: 'GITBranch', value: GITBranch),
+                                    string(name: 'GITComment', value: GITComment),
+                                    string(name: 'GITFolder', value: GITFolder)
+                            ]
+                        }
+                        catch (err) {
+                            echo err.getMessage()
+                        }
                     }
                 }
             }
