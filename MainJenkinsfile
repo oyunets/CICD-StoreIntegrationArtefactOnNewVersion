@@ -3,15 +3,25 @@ def artifactIds = []
 pipeline {
     agent any
 
+    {
+        "oauth": {
+        "createdate": "2023-02-02T09:07:05.998Z",
+        "clientid": "sb-d84ec048-0800-4aaf-8d9f-7ea7622745a6!b130081|it!b55215",
+        "url": "https://f4c7d2e5trial.it-cpitrial06.cfapps.us10-001.hana.ondemand.com",
+        "clientsecret": "cd3783fd-40f0-43ff-a3a3-e66563ec35b7$EdbvmVHToo-L0cnZDo56Zby3i2nTfTs_XoTiXndocoM=",
+        "tokenurl": "https://f4c7d2e5trial.authentication.us10.hana.ondemand.com/oauth/token"
+        }
+    }
+
     //Configure the following environment variables before executing the Jenkins Job
     environment {
         IntegrationPackageID = "EPAM"
-        CPIHost = "${env.CPI_HOST}"
-        CPIOAuthHost = "${env.CPI_OAUTH_HOST}"
-        CPIOAuthCredentials = "${env.CPI_OAUTH_CRED}"
-        GITRepositoryURL = "${env.GIT_REPOSITORY_URL}"
-        GITCredentials = "${env.GIT_CRED}"
-        GITBranch = "${env.GIT_BRANCH_NAME}"
+        CPIHost = 'https://f4c7d2e5trial.it-cpitrial06.cfapps.us10-001.hana.ondemand.com'
+        CPIOAuthHost = 'https://f4c7d2e5trial.authentication.us10.hana.ondemand.com/oauth/token'
+        CPIOAuthCredentials = 'ci-api'
+        GITRepositoryURL = 'https://github.com/oyunets/books'
+        GITCredentials = 'git'
+        GITBranch = 'main'
         GITComment = "Integration Artefacts update from CI/CD pipeline"
         GITFolder = "IntegrationContent/IntegrationArtefacts"
     }
