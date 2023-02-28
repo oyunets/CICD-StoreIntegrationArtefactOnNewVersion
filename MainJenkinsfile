@@ -13,7 +13,7 @@ pipeline {
         GITCredentials = 'git'
         GITBranch = 'main'
         GITComment = "Integration Artefacts update from CI/CD pipeline"
-        GITFolder = "IntegrationContent/${IntegrationPackageID}/IntegrationArtefacts"
+        GITFolder = "IntegrationContent/IntegrationArtefacts/${IntegrationPackageID}"
     }
 
 //    parameters {
