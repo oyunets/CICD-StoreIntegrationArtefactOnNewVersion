@@ -54,9 +54,9 @@ pipeline {
                             timeout: 30,
                             url: 'https://' + env.CPIHost + '/api/v1/IntegrationPackages(Id=\'' + env.IntegrationPackageID + '\')/IntegrationDesigntimeArtifacts'
                     def jsonObj2 = readJSON text: cpiPackageResponse.content
-                    jsonObj2.d.results.each { result ->
-                        artifactIds.push(result.Id)
-                        println(result)
+                    jsonObj2.d.results.each { artefact ->
+                        artifactIds.push(artefact)
+                        println(artefact)
                     }
                     cpiPackageResponse.close()
                 }
@@ -66,22 +66,23 @@ pipeline {
         stage('Process iFlows ') {
             steps {
                 script {
-                    artifactIds.each { id ->
+                    artifactIds.each { artefact ->
                         try {
-                            echo 'Start job with IntegrationFlowID = ' + id
-//                            build job: 'iFlow', wait: true, parameters: [
-//                                    string(name: 'IntegrationPackageID', value: IntegrationPackageID),
-//                                    string(name: 'IntegrationFlowID', value: id),
-//                                    string(name: 'CPIHost', value: CPIHost),
-//                                    string(name: 'CPIOAuthHost', value: CPIOAuthHost),
-//                                    string(name: 'CPIOAuthCredentials', value: CPIOAuthCredentials),
-//                                    string(name: 'GITRepositoryURL', value: GITRepositoryURL),
-//                                    string(name: 'GITCredentials', value: GITCredentials),
-//                                    string(name: 'GITBranch', value: GITBranch),
-//                                    string(name: 'GITComment', value: GITComment),
-//                                    string(name: 'GITFolder', value: GITFolder),
-//                                    string(name: 'Modifier', value: GITFolder)
-//                            ]
+                            echo 'Start job with IntegrationFlowID = ' + artefact.Id
+                            build job: 'iFlow', wait: true, parameters: [
+                                    string(name: 'IntegrationPackageID', value: IntegrationPackageID),
+                                    string(name: 'IntegrationFlowID', value: id),
+                                    string(name: 'CPIHost', value: CPIHost),
+                                    string(name: 'CPIOAuthHost', value: CPIOAuthHost),
+                                    string(name: 'CPIOAuthCredentials', value: CPIOAuthCredentials),
+                                    string(name: 'GITRepositoryURL', value: GITRepositoryURL),
+                                    string(name: 'GITCredentials', value: GITCredentials),
+                                    string(name: 'GITBranch', value: GITBranch),
+                                    string(name: 'GITComment', value: GITComment),
+                                    string(name: 'GITFolder', value: GITFolder),
+                                    string(name: 'CreatetedBy', value: artefact.CreatetedBy),
+                                    string(name: 'ModifiedBy', value: artefact.ModifiedBy)
+                            ]
                         }
                         catch (err) {
                             echo err.getMessage()

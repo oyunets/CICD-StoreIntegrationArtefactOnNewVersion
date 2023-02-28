@@ -15,6 +15,8 @@ pipeline {
         string(name: 'GITBranch', defaultValue: 'GITBranch', description: 'GITBranch')
         string(name: 'GITComment', defaultValue: 'Integration Artefacts update from CI/CD pipeline', description: 'GITComment')
         string(name: 'GITFolder', defaultValue: 'IntegrationContent/IntegrationArtefacts', description: 'GITFolder')
+        string(name: 'CreatetedBy', defaultValue: 'CreatetedBy', description: 'CreatetedBy')
+        string(name: 'ModifiedBy', defaultValue: 'ModifiedBy', description: 'ModifiedBy')
     }
 
     stages {
