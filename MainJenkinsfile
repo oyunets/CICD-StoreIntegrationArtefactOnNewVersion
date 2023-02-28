@@ -13,7 +13,7 @@ pipeline {
         GITCredentials = 'git'
         GITBranch = 'main'
         GITComment = "Integration Artefacts update from CI/CD pipeline"
-        GITFolder = "IntegrationContent/IntegrationArtefacts"
+        GITFolder = "IntegrationContent/${IntegrationPackageID}/IntegrationArtefacts"
     }
 
 //    parameters {
@@ -68,7 +68,18 @@ pipeline {
                 script {
                     artifactIds.each { id ->
                         echo 'Start job with IntegrationFlowID = ' + id
-                        build job: 'Process iFlow', wait: false, parameters: [string(name: 'IntegrationFlowID', value: id)]
+                        build job: 'iFlow', wait: false, parameters: [
+                                string(name: 'IntegrationPackageID', value: IntegrationPackageID),
+                                string(name: 'IntegrationFlowID', value: id),
+                                string(name: 'CPIHost', value: CPIHost),
+                                string(name: 'CPIOAuthHost', value: CPIOAuthHost),
+                                string(name: 'CPIOAuthCredentials', value: CPIOAuthCredentials),
+                                string(name: 'GITRepositoryURL', value: GITRepositoryURL),
+                                string(name: 'GITCredentials', value: GITCredentials),
+                                string(name: 'GITBranch', value: GITBranch),
+                                string(name: 'GITComment', value: GITComment),
+                                string(name: 'GITFolder', value: GITFolder)
+                        ]
                     }
                 }
             }
