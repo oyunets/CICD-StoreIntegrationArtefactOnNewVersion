@@ -6,10 +6,10 @@ pipeline {
     //Configure the following environment variables before executing the Jenkins Job
     environment {
         IntegrationPackageID = "EPAM"
-        CPIHost = 'https://f4c7d2e5trial.it-cpitrial06.cfapps.us10-001.hana.ondemand.com'
-        CPIOAuthHost = 'https://f4c7d2e5trial.authentication.us10.hana.ondemand.com/oauth/token'
+        CPIHost = 'f4c7d2e5trial.it-cpitrial06.cfapps.us10-001.hana.ondemand.com'
+        CPIOAuthHost = 'f4c7d2e5trial.authentication.us10.hana.ondemand.com/oauth/token'
         CPIOAuthCredentials = 'ci-api'
-        GITRepositoryURL = 'https://github.com/oyunets/books'
+        GITRepositoryURL = 'github.com/oyunets/books'
         GITCredentials = 'git'
         GITBranch = 'main'
         GITComment = "Integration Artefacts update from CI/CD pipeline"
