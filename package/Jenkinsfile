@@ -69,7 +69,7 @@ pipeline {
                     artifactIds.each { artefact ->
                         try {
                             echo 'Start job with IntegrationFlowID = ' + artefact.Id
-                            build job: 'iFlow', wait: true, parameters: [
+                            build job: 'iFlow', wait: false, parameters: [
                                     string(name: 'IntegrationPackageID', value: IntegrationPackageID),
                                     string(name: 'IntegrationFlowID', value: artefact.Id),
                                     string(name: 'CPIHost', value: CPIHost),
