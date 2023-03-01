@@ -184,12 +184,12 @@ pipeline {
 
                     println("Check iFlow")
                     dir('.') {
-                        def result;
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-                            result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./', label: "Check for optional rules", returnStdout: true)
+                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                            def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./', label: "Check for optional rules", returnStatus : true)
+                            if (result != 0) {
+                                error "CPILint return code ${result}"
+                            }
                         }
-                        echo "Print result";
-                        echo result;
                     }
 
                     println("Cleanup")
