@@ -185,7 +185,7 @@ pipeline {
                     println("Check iFlow")
                     dir('.') {
                         try {
-                            def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./', label: "Check for optional rules", returnStatus: true, returnStdout: true).trim();
+                            def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./', label: "Check for optional rules", returnStatus: true, returnStdout: true)
                             echo result;
                         }
                         catch (err) {
