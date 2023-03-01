@@ -12,9 +12,13 @@ pipeline {
         string(name: 'CPIHost', defaultValue: 'CPIHost', description: 'CPIHost')
         string(name: 'CPIOAuthHost', defaultValue: 'CPIOAuthHost', description: 'CPIOAuthHost')
         string(name: 'CPIOAuthCredentials', defaultValue: 'CPIOAuthCredentials', description: 'CPIOAuthCredentials')
+
+        string(name: 'GITRepositoryURL', defaultValue: 'GITRepositoryURL', description: 'GITRepositoryURL')
+        string(name: 'GITCredentials', defaultValue: 'GITCredentials', description: 'GITCredentials')
         string(name: 'GITBranch', defaultValue: 'GITBranch', description: 'GITBranch')
         string(name: 'GITComment', defaultValue: 'Integration Artefacts update from CI/CD pipeline', description: 'GITComment')
         string(name: 'GITFolder', defaultValue: 'IntegrationContent/IntegrationArtefacts', description: 'GITFolder')
+
         string(name: 'CreatetedBy', defaultValue: 'CreatetedBy', description: 'CreatetedBy')
         string(name: 'ModifiedBy', defaultValue: 'ModifiedBy', description: 'ModifiedBy')
     }
@@ -109,11 +113,11 @@ pipeline {
         }
 
         stage('Store new versions in Git') {
-            when {
-                expression {
-                    isNewVersion
-                }
-            }
+//            when {
+//                expression {
+//                    isNewVersion
+//                }
+//            }
             steps {
                 script {
                     //get Cloud Integration Oauth token
@@ -161,11 +165,11 @@ pipeline {
         }
 
         stage('Check with CPILint') {
-            when {
-                expression {
-                    isNewVersion
-                }
-            }
+//            when {
+//                expression {
+//                    isNewVersion
+//                }
+//            }
             steps {
                 script {
                     println("Get CPILint from SCM")
@@ -185,7 +189,7 @@ pipeline {
                             echo result;
                         }
                         catch (err) {
-                            echo err
+                            echo err.getMessage()
                             currentBuild.result = 'UNSTABLE'
                         }
                     }
