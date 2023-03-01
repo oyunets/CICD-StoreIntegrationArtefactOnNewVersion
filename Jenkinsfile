@@ -185,10 +185,11 @@ pipeline {
                     println("Check iFlow")
                     dir('.') {
                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus : true)
+                            def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus: true)
                             if (result != 0) {
                                 def output = readFile(file: 'result.txt')
                                 echo output
+                                mail to: CreatetedBy, ModifiedBy, subject: 'CPILint check errors', body: output
                                 error "CPILint return code ${result}"
                             }
                         }
@@ -209,66 +210,60 @@ pipeline {
             steps {
                 script {
                     //get token
-                    println("Requesting token from Cloud Integration tenant");
+                    println("Requesting token from Cloud Integration tenant")
                     def getTokenResp = httpRequest acceptType: 'APPLICATION_JSON',
                             authentication: params.CPIOAuthCredentials,
                             contentType: 'APPLICATION_JSON',
                             httpMode: 'POST',
                             responseHandle: 'LEAVE_OPEN',
                             timeout: 30,
-                            url: 'https://' + params.CPIOAuthHost + '/oauth/token?grant_type=client_credentials';
+                            url: 'https://' + params.CPIOAuthHost + '/oauth/token?grant_type=client_credentials'
                     def jsonObjToken = readJSON text: getTokenResp.content
                     def token = "Bearer " + jsonObjToken.access_token
 
                     //deploy integration flow
-                    println("Deploying integration flow");
+                    println("Deploying integration flow")
                     def deployResp = httpRequest httpMode: 'POST',
-                            customHeaders: [
-                                    [maskValue: false, name: 'Authorization', value: token]
-                            ],
+                            customHeaders: [[maskValue: false, name: 'Authorization', value: token]],
                             ignoreSslErrors: true,
                             timeout: 30,
-                            url: 'https://' + params.CPIHost + '/api/v1/DeployIntegrationDesigntimeArtifact?Id=\'' + params.IntegrationFlowID + '\'&Version=\'' + cpiVersion + '\'';
+                            url: 'https://' + params.CPIHost + '/api/v1/DeployIntegrationDesigntimeArtifact?Id=\'' + params.IntegrationFlowID + '\'&Version=\'' + cpiVersion + '\''
 
-                    Integer counter = 0;
-                    def deploymentStatus;
-                    def continueLoop = true;
-                    println("Deployment successful triggered. Checking status.");
+                    Integer counter = 0
+                    def deploymentStatus
+                    def continueLoop = true
+                    println("Deployment successful triggered. Checking status.")
                     //performing the loop until we get a final deployment status.
                     while (counter < 20 & continueLoop == true) {
                         timeout(time: 3, unit: 'SECONDS') {
-                            counter = counter + 1;
+                            counter = counter + 1
                             def statusResp = httpRequest acceptType: 'APPLICATION_JSON',
-                                    customHeaders: [
-                                            [maskValue: false, name: 'Authorization', value: token]
-                                    ],
+                                    customHeaders: [[maskValue: false, name: 'Authorization', value: token]],
                                     httpMode: 'GET',
                                     responseHandle: 'LEAVE_OPEN',
                                     timeout: 30,
-                                    url: 'https://' + params.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + params.IntegrationFlowID + '\')';
-                            def jsonObj = readJSON text: statusResp.content;
-                            deploymentStatus = jsonObj.d.Status;
+                                    url: 'https://' + params.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + params.IntegrationFlowID + '\')'
+                            def jsonObj = readJSON text: statusResp.content
+                            deploymentStatus = jsonObj.d.Status
 
-                            println("Deployment status: " + deploymentStatus);
+                            println("Deployment status: " + deploymentStatus)
                             if (deploymentStatus.equalsIgnoreCase("Error")) {
                                 //get error details
                                 def deploymentErrorResp = httpRequest acceptType: 'APPLICATION_JSON',
-                                        customHeaders: [
-                                                [maskValue: false, name: 'Authorization', value: token]
-                                        ],
+                                        customHeaders: [[maskValue: false, name: 'Authorization', value: token]],
                                         httpMode: 'GET',
                                         responseHandle: 'LEAVE_OPEN',
                                         timeout: 30,
-                                        url: 'https://' + params.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + params.IntegrationFlowID + '\')' + '/ErrorInformation/$value';
+                                        url: 'https://' + params.CPIHost + '/api/v1/IntegrationRuntimeArtifacts(\'' + params.IntegrationFlowID + '\')' + '/ErrorInformation/$value'
                                 def jsonErrObj = readJSON text: deploymentErrorResp.content
-                                def deployErrorInfo = jsonErrObj.parameter;
-                                println("Error Details: " + deployErrorInfo);
-                                statusResp.close();
-                                deploymentErrorResp.close();
-                                error("Integration flow not deployed successfully. Ending job now.");
+                                def deployErrorInfo = jsonErrObj.parameter
+                                println("Error Details: " + deployErrorInfo)
+                                statusResp.close()
+                                deploymentErrorResp.close()
+                                error("Integration flow not deployed successfully. Ending job now.")
                             } else if (deploymentStatus.equalsIgnoreCase("Started")) {
                                 println("Integration flow deployment was successful")
-                                statusResp.close();
+                                statusResp.close()
                                 continueLoop = false
                             } else {
                                 println("The integration flow is not yet started. Will wait 3s and then check again.")
@@ -276,7 +271,7 @@ pipeline {
                         }
                     }
                     if (!deploymentStatus.equalsIgnoreCase("Started")) {
-                        error("No final deployment status could be reached. Kindly check the tenant for any issue.");
+                        error("No final deployment status could be reached. Kindly check the tenant for any issue.")
                     }
                 }
             }
