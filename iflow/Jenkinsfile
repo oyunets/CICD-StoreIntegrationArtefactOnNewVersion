@@ -42,7 +42,7 @@ pipeline {
                               branches                         : [[name: params.GITBranch]],
                               doGenerateSubmoduleConfigurations: false,
                               extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: "."],
-                                                                  [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[$class: 'SparseCheckoutPath', path: params.GITFolder]]]],
+                                                                  [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[$class: 'SparseCheckoutPath', path: params.GITFolder + '/' + params.IntegrationFlowID]]]],
                               submoduleCfg                     : [],
                               userRemoteConfigs                : [[credentialsId: params.GITCredentials,
                                                                    url          : 'https://' + params.GITRepositoryURL]]])
