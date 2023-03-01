@@ -19,7 +19,7 @@ pipeline {
         string(name: 'GITComment', defaultValue: 'Integration Artefacts update from CI/CD pipeline', description: 'GITComment')
         string(name: 'GITFolder', defaultValue: 'IntegrationContent/IntegrationArtefacts', description: 'GITFolder')
 
-        string(name: 'CreatetedBy', defaultValue: 'CreatetedBy', description: 'CreatetedBy')
+        string(name: 'CreatedBy', defaultValue: 'CreatedBy', description: 'CreatedBy')
         string(name: 'ModifiedBy', defaultValue: 'ModifiedBy', description: 'ModifiedBy')
     }
 
@@ -189,7 +189,7 @@ pipeline {
                             if (result != 0) {
                                 def output = readFile(file: 'result.txt')
                                 echo output
-                                mail to: [CreatetedBy, ModifiedBy], subject: 'CPILint check errors', body: output
+                                mail to: "${params.CreatedBy}, ${params.ModifiedBy}", subject: 'CPILint check errors', body: output
                                 error "CPILint return code ${result}"
                             }
                         }
