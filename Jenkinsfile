@@ -79,7 +79,7 @@ pipeline {
                     cpiVersionResponse.close()
 
                     // initial version is 1.0.0
-                    if ("1.0.0".equalsIgnoreCase(cpiVersion.trim)) {
+                    if ("1.0.0".equalsIgnoreCase(cpiVersion.trim())) {
                         currentBuild.result = 'SUCCESS'
                         return
                     }
