@@ -184,7 +184,7 @@ pipeline {
 
                     println("Check iFlow")
                     dir('.') {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus: true)
                             if (result != 0) {
                                 def output = readFile(file: 'result.txt')
