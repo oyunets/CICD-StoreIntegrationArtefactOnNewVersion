@@ -78,6 +78,12 @@ pipeline {
                     println("Flow version on Cloud Integration tenant: '" + cpiVersion + "'")
                     cpiVersionResponse.close()
 
+                    // initial version is 1.0.0
+                    if ("1.0.0".equalsIgnoreCase(cpiVersion.trim)) {
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
                     //get version from source repository
                     def git_version
                     if (fileExists(params.GITFolder + '/' + params.IntegrationFlowID)) {
@@ -113,11 +119,11 @@ pipeline {
         }
 
         stage('Store new versions in Git') {
-//            when {
-//                expression {
-//                    isNewVersion
-//                }
-//            }
+            when {
+                expression {
+                    isNewVersion
+                }
+            }
             steps {
                 script {
                     //get Cloud Integration Oauth token
@@ -165,11 +171,11 @@ pipeline {
         }
 
         stage('Check with CPILint') {
-//            when {
-//                expression {
-//                    isNewVersion
-//                }
-//            }
+            when {
+                expression {
+                    isNewVersion
+                }
+            }
             steps {
                 script {
                     println("Get CPILint from SCM")
@@ -188,8 +194,7 @@ pipeline {
                             def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus: true)
                             if (result != 0) {
                                 def output = readFile(file: 'result.txt')
-                                echo output
-                                mail to: "${params.CreatedBy}, ${params.ModifiedBy}", subject: 'CPILint check errors', body: output
+//                                mail to: "${params.CreatedBy}, ${params.ModifiedBy}", subject: 'CPILint check errors', body: output
                                 error "CPILint return code ${result}"
                             }
                         }
