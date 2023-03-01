@@ -189,7 +189,7 @@ pipeline {
                             if (result != 0) {
                                 def output = readFile(file: 'result.txt')
                                 echo output
-                                mail to: CreatetedBy, ModifiedBy, subject: 'CPILint check errors', body: output
+                                mail to: [CreatetedBy, ModifiedBy], subject: 'CPILint check errors', body: output
                                 error "CPILint return code ${result}"
                             }
                         }
