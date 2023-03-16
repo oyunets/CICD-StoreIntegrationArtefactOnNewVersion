@@ -5,10 +5,6 @@ def iFlowFile
 pipeline {
     agent any
 
-    environment {
-        webhookUrl: "${env.TEAMS_WEBHOOK_URL}"
-    }
-
     //Configure the following environment variables before executing the Jenkins Job
     parameters {
         string(name: 'IntegrationPackageID', defaultValue: 'IntegrationPackageID', description: 'Integration Package ID')
