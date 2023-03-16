@@ -193,7 +193,7 @@ pipeline {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus: true)
                             if (result != 0) {
-                                def text = readFile(file: 'result.txt')
+                                def text = readFile(file: 'result.txt').replaceAll('\n', '\r\n');
 //                                mail to: "${params.CreatedBy}, ${params.ModifiedBy}", subject: 'CPILint check errors', body: output
                                 office365ConnectorSend message: "${text}", status: 'Warning'
                                 error "CPILint return code ${result}"
