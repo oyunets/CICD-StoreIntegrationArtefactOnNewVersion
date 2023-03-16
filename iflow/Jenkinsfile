@@ -29,6 +29,7 @@ pipeline {
                 script {
                     //clean up workspace first
                     echo 'Initialize pipeline'
+                    office365ConnectorSend webhookUrl: 'https://epam.webhook.office.com/webhookb2/12f4195a-ba47-4d4a-88b5-e939e8deaf2f@b41b72d0-4e9f-4c26-8a69-f949f367c91d/JenkinsCI/74a38ce47a7646e1af7ba7022b7e55a2/c672108b-8200-4f11-aceb-fb2038f05b5b', message: 'Initialize pipeline', status: 'Warning'
                     deleteDir()
                 }
             }
@@ -193,8 +194,9 @@ pipeline {
                         catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
                             def result = bat(script: '@./cpilint/bin/cpilint -rules ./cpilint/rules/rules.xml -directory ./ > result.txt', label: "Check for optional rules", returnStatus: true)
                             if (result != 0) {
-                                def output = readFile(file: 'result.txt')
+                                def text = readFile(file: 'result.txt')
 //                                mail to: "${params.CreatedBy}, ${params.ModifiedBy}", subject: 'CPILint check errors', body: output
+                                office365ConnectorSend webhookUrl: 'https://epam.webhook.office.com/webhookb2/12f4195a-ba47-4d4a-88b5-e939e8deaf2f@b41b72d0-4e9f-4c26-8a69-f949f367c91d/JenkinsCI/74a38ce47a7646e1af7ba7022b7e55a2/c672108b-8200-4f11-aceb-fb2038f05b5b', message: "${text}", status: 'Warning'
                                 error "CPILint return code ${result}"
                             }
                         }
