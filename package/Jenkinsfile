@@ -29,8 +29,6 @@ pipeline {
         stage('Initialization') {
             steps {
                 script {
-                    def value = 'NODE_NAME'
-                    echo System.getenv(value)
                     //clean up workspace first
                     echo 'Initialize pipeline'
                     deleteDir()
