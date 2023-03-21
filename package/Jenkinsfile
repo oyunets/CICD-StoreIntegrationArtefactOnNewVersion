@@ -29,8 +29,9 @@ pipeline {
         stage('Initialization') {
             steps {
                 script {
-                    def node_env_properties = Jenkins.instance.getNode("${NODE_NAME}").getNodeProperty(EnvironmentVariablesNodeProperty)?.getEnvVars()
-                    node_env_properties.each { name, value -> println "Name: $name -> Value $value" }
+                    def value = 'NODE_NAME'
+                    def node_name = "${" + value + "}"
+                    echo node_name
                     //clean up workspace first
                     echo 'Initialize pipeline'
                     deleteDir()
